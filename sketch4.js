@@ -44,6 +44,24 @@ let speech = '',
   speechText;
 let speechParagraph = '';
 
+let speechRecognition, speechRecognitionText;
+
+var isChromium = window.chrome;
+var winNav = window.navigator;
+var vendorName = winNav.vendor;
+var isOpera = typeof window.opr !== 'undefined';
+var isIEedge = winNav.userAgent.indexOf('Edg') > -1;
+var isIOSChrome = winNav.userAgent.match('CriOS');
+
+if (isIOSChrome) {
+  // is Google Chrome on IOS
+} else if (isChromium !== null && typeof isChromium !== 'undefined' && vendorName === 'Google Inc.' && isOpera === false && isIEedge === false) {
+  // is Google Chrome
+} else {
+  // not Google Chrome
+  speechRecognition = 'This browser does not support Google Speech Recognition.  Please use Google Chrome Web Browser.';
+}
+
 function preload() {
   jet = loadModel('assets/jet.obj');
   bg = loadImage('assets/bg.png');
@@ -64,7 +82,6 @@ function setup() {
   speechRec.onResult = gotSpeech;
   speechRec.onEnd = restart;
   speechRec.start(continuous, interimResults);
-  console.log(speechRec);
 
   video = createCapture(VIDEO);
   video.size(width, height);
@@ -96,12 +113,16 @@ function setup() {
   debuggerText = createP('Press D to toggle debugger mode');
   debuggerText.class('debugger');
 
+  speechRecognitionText = createP(speechRecognition);
+  speechRecognitionText.class('speechRecognitionText');
+
   // bg.hide();
   video.hide();
   flightDirectionText.hide();
   speedDirectionText.hide();
   speechParagraph.hide();
   debuggerText.hide();
+  speechRecognitionText.hide();
 
   gravity = createVector(0, 0, 0.1);
 
@@ -151,6 +172,7 @@ function draw() {
       speechText.show();
       speechText.html(speech);
       speechParagraph.show();
+      speechRecognitionText.show();
     } else {
       flightDirectionText.hide();
       speedDirectionText.hide();
@@ -159,6 +181,7 @@ function draw() {
       framerateText.hide();
       speechText.hide();
       speechParagraph.hide();
+      speechRecognitionText.hide();
     }
 
     if (frameRate() < 30) {
@@ -180,7 +203,7 @@ function gotSpeech() {
   // }
   if (speechRec.resultValue) {
     let said = speechRec.resultString;
-    speech = said;
+    speech = said
 
     if (said === 'toilet') {
       if (inflight.isPlaying()) {

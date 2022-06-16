@@ -64,3 +64,10 @@ canvas {
   top: 60px;
   right: 100px;
 }
+
+.speechRecognitionText {
+  color: white;
+  position: absolute;
+  top: 80px;
+  right: 100px;
+}
