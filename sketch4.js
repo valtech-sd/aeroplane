@@ -27,7 +27,7 @@ let framerate, framerateText;
 let averageSpeed = [];
 
 // developer mode
-let developerMode = false;
+let debuggerMode = false;
 let debuggerText;
 
 let gravity;
@@ -46,21 +46,17 @@ let speechParagraph = '';
 
 let speechRecognition, speechRecognitionText;
 
-var isChromium = window.chrome;
-var winNav = window.navigator;
-var vendorName = winNav.vendor;
-var isOpera = typeof window.opr !== 'undefined';
-var isIEedge = winNav.userAgent.indexOf('Edg') > -1;
-var isIOSChrome = winNav.userAgent.match('CriOS');
+// developer mode
+let developerMode = true;
 
-if (isIOSChrome) {
-  // is Google Chrome on IOS
-} else if (isChromium !== null && typeof isChromium !== 'undefined' && vendorName === 'Google Inc.' && isOpera === false && isIEedge === false) {
-  // is Google Chrome
-} else {
-  // not Google Chrome
-  speechRecognition = 'This browser does not support Google Speech Recognition.  Please use Google Chrome Web Browser.';
-}
+// rain
+let drops = new Array(250);
+let letItRain = false;
+
+// snow
+let snow = new Array(300);
+let letItSnow = false;
+let snowGravity;
 
 function preload() {
   jet = loadModel('assets/jet.obj');
@@ -75,6 +71,8 @@ function preload() {
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   glContext = canvas.GL;
+
+  isGoogleChrome();
 
   speechRec = new p5.SpeechRec('en-US', gotSpeech);
   continuous = false;
@@ -129,6 +127,16 @@ function setup() {
   for (let i = 0; i < 20; i++) {
     clouds.push(new Cloud(cloud));
   }
+
+  for (let i = 0; i < drops.length; i++) {
+    drops[i] = new Drop();
+  }
+
+  snowGravity = createVector(0, 0.03, 0);
+
+  for (let i = 0; i < snow.length; i++) {
+    snow[i] = new Snowflake();
+  }
 }
 
 function draw() {
@@ -160,7 +168,28 @@ function draw() {
       cloud.render();
     }
 
-    if (developerMode) {
+    if (letItRain) {
+      if (letItSnow) {
+        letItSnow = false;
+      }
+      for (let drop of drops) {
+        drop.fall();
+        drop.render();
+      }
+    }
+
+    if (letItSnow) {
+      if (letItRain) {
+        letItRain = false;
+      }
+      for (let flake of snow) {
+        flake.applyForce(snowGravity);
+        flake.update();
+        flake.render();
+      }
+    }
+
+    if (debuggerMode) {
       flightDirectionText.show();
       speedDirectionText.show();
       flyingModeText.show();
@@ -198,12 +227,9 @@ function restart() {
 }
 
 function gotSpeech() {
-  // if (!announcements.isPlaying()) {
-  //   inflight.loop();
-  // }
   if (speechRec.resultValue) {
     let said = speechRec.resultString;
-    speech = said
+    speech = said;
 
     if (said === 'toilet') {
       if (inflight.isPlaying()) {
@@ -215,6 +241,14 @@ function gotSpeech() {
       setTimeout(() => {
         inflight.loop();
       }, 7000);
+    }
+
+    if (said.includes('rain')) {
+      letItRain = !letItRain;
+    }
+
+    if (said.includes('snow')) {
+      letItSnow = !letItSnow;
     }
   }
 }
@@ -231,23 +265,27 @@ function modelLoaded() {
 
 function soundLoaded() {
   console.log('sound loaded');
-  // announcements.play(0, 1, 1, 17, 27);
-  // setTimeout(() => {
-  // announcements.play(0, 1, 1, 125, 30);
-  // setTimeout(() => {
-  //   takeoff.play(0, 1, 1, 0, 17);
-  //   setTimeout(() => {
-  //     frameworkReady = true;
-  //     debuggerText.show();
-  //     inflight.loop();
-  //   }, 17000);
-  // }, 30000);
-  // }, 27000);
-
-  frameworkReady = true;
-  setTimeout(() => {
-    debuggerText.show();
-  }, 0);
+  if (!developerMode) {
+    setTimeout(() => {
+      // announcements.play(0, 1, 1, 17, 27);
+      // setTimeout(() => {
+      announcements.play(0, 1, 1, 125, 30);
+      setTimeout(() => {
+        takeoff.play(0, 1, 1, 0, 17);
+        setTimeout(() => {
+          frameworkReady = true;
+          debuggerText.show();
+          inflight.loop();
+        }, 17000);
+      }, 30000);
+      // }, 27000);
+    }, 2000);
+  } else {
+    frameworkReady = true;
+    setTimeout(() => {
+      debuggerText.show();
+    }, 0);
+  }
 }
 
 function poseNetLoaded() {
@@ -307,7 +345,25 @@ function smoothing(speed) {
 
 function keyPressed() {
   if (key === 'd') {
-    developerMode = !developerMode;
+    debuggerMode = !debuggerMode;
     debuggerText.hide();
+  }
+}
+
+function isGoogleChrome() {
+  const isChromium = window.chrome;
+  const winNav = window.navigator;
+  const vendorName = winNav.vendor;
+  const isOpera = typeof window.opr !== 'undefined';
+  const isIEedge = winNav.userAgent.indexOf('Edg') > -1;
+  const isIOSChrome = winNav.userAgent.match('CriOS');
+
+  if (isIOSChrome) {
+    // is Google Chrome on IOS
+  } else if (isChromium !== null && typeof isChromium !== 'undefined' && vendorName === 'Google Inc.' && isOpera === false && isIEedge === false) {
+    // is Google Chrome
+  } else {
+    // not Google Chrome
+    speechRecognition = 'This browser does not support Google Speech Recognition.  Please use Google Chrome Web Browser.';
   }
 }
