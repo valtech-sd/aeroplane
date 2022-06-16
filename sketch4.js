@@ -93,7 +93,7 @@ function setup() {
   speechParagraph = createP('speech recognition:');
   speechParagraph.class('speechParagraph');
 
-  debuggerText = createP('Press D for debugger mode');
+  debuggerText = createP('Press D to toggle debugger mode');
   debuggerText.class('debugger');
 
   // bg.hide();
@@ -101,6 +101,7 @@ function setup() {
   flightDirectionText.hide();
   speedDirectionText.hide();
   speechParagraph.hide();
+  debuggerText.hide();
 
   gravity = createVector(0, 0, 0.1);
 
@@ -209,17 +210,21 @@ function soundLoaded() {
   console.log('sound loaded');
   // announcements.play(0, 1, 1, 17, 27);
   // setTimeout(() => {
-  //   announcements.play(0, 1, 1, 125, 30);
+  // announcements.play(0, 1, 1, 125, 30);
+  // setTimeout(() => {
+  //   takeoff.play(0, 1, 1, 0, 17);
   //   setTimeout(() => {
-  //     takeoff.play(0, 1, 1, 0, 17);
-  //     setTimeout(() => {
-  //       frameworkReady = true;
-  //       inflight.loop();
-  //     }, 17000);
-  //   }, 30000);
+  //     frameworkReady = true;
+  //     debuggerText.show();
+  //     inflight.loop();
+  //   }, 17000);
+  // }, 30000);
   // }, 27000);
 
   frameworkReady = true;
+  setTimeout(() => {
+    debuggerText.show();
+  }, 0);
 }
 
 function poseNetLoaded() {
