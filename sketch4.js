@@ -7,37 +7,45 @@ let canvas,
 // models
 let jet, cloud;
 
+// background image
 let bg;
 
+// graphics library context
 let glContext;
 
-let flyingMode = 'waiting for posenet...',
-  flyingModeText,
-  speed = 'waiting for posenet...',
+// flight direction
+let flightDirectionText,
+  flyingMode = 'waiting for posenet...',
+  flyingModeText;
+
+let speed = 'waiting for posenet...',
   speedText,
-  flightDirectionText,
   speedDirectionText;
 
 let framerate, framerateText;
 
 let averageSpeed = [];
 
+// developer mode
 let developerMode = false;
+let debuggerText;
 
 let gravity;
 let clouds = [];
 
+// sounds
 let toilet, inflight, announcements, takeoff;
 
+// speech recognition
 let speechRec, continuous, interimResults;
 
+// speech recognition for debugger mode
 let speech = '',
   speechText;
 let speechParagraph = '';
 
 function preload() {
   jet = loadModel('assets/jet.obj');
-  // bg = createVideo('assets/beach.mp4', videoLoaded);
   bg = loadImage('assets/bg.png');
   cloud = loadModel('assets/clouds.obj');
   toilet = loadSound('assets/toilet.mp3');
@@ -65,35 +73,28 @@ function setup() {
   poseNet.on('pose', gotPoses);
 
   flightDirectionText = createP('flight direction:');
-  flightDirectionText.position(90, 10);
-  flightDirectionText.style('color', 'white');
+  flightDirectionText.class('flightDirectionText');
 
   flyingModeText = createP('');
-  flyingModeText.position(200, 10);
-  flyingModeText.style('color', 'white');
+  flyingModeText.class('flyingModeText');
 
   speedDirectionText = createP('speed direction:');
-  speedDirectionText.position(90, 60);
-  speedDirectionText.style('color', 'white');
+  speedDirectionText.class('speedDirectionText');
 
   speedText = createP('');
-  speedText.position(200, 40);
-  speedText.style('font-size', '28px');
-  speedText.style('color', 'white');
+  speedText.class('speedText');
 
   framerateText = createP('');
-  framerateText.position(1000, 10);
-  framerateText.style('font-size', '28px');
-  framerateText.style('color', 'white');
+  framerateText.class('framerateText');
 
   speechText = createP('');
-  speechText.position(1000, 40);
-  speechText.style('font-size', '28px');
-  speechText.style('color', 'white');
+  speechText.class('speechText');
 
   speechParagraph = createP('speech recognition:');
-  speechParagraph.position(865, 61);
-  speechParagraph.style('color', 'white');
+  speechParagraph.class('speechParagraph');
+
+  debuggerText = createP('Press D for debugger mode');
+  debuggerText.class('debugger');
 
   // bg.hide();
   video.hide();
@@ -227,8 +228,6 @@ function poseNetLoaded() {
 
 function videoLoaded() {
   console.log('video loaded');
-  // bg.loop();
-  // bg.speed(3);
 }
 
 function flyAeroplane() {
@@ -281,5 +280,6 @@ function smoothing(speed) {
 function keyPressed() {
   if (key === 'd') {
     developerMode = !developerMode;
+    debuggerText.hide();
   }
 }
