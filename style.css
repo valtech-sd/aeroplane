@@ -90,3 +90,9 @@ canvas {
   right: 100px;
 }
 
+.safariWarning {
+  color: white;
+  position: absolute;
+  top: 100px;
+  left: calc(50% - 150px);
+}

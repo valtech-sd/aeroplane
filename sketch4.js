@@ -68,6 +68,9 @@ let recognition;
 let isTurbulence = false;
 
 let isGoogle = false;
+let isSafari = false;
+
+let safariWarning;
 
 function preload() {
   jet = loadModel('assets/jet.obj');
@@ -140,6 +143,9 @@ function setup() {
   debuggerText.hide();
   speechRecognitionText.hide();
   help.hide();
+
+  safariWarning = isSafari ? createP('Safari is not supported.  Please try Google Chrome') : createP('');
+  safariWarning.class('safariWarning');
 
   gravity = createVector(0, 0, 0.1);
 
@@ -400,6 +406,8 @@ function isGoogleChrome() {
   } else if (isChromium !== null && typeof isChromium !== 'undefined' && vendorName === 'Google Inc.' && isOpera === false && isIEedge === false) {
     // is Google Chrome
     return true;
+  } else if (navigator.userAgent.indexOf('Safari') != -1) {
+    isSafari = true;
   } else {
     // not Google Chrome
     speechRecognition = 'This browser does not support Google Speech Recognition.  Please use Google Chrome Web Browser.';
