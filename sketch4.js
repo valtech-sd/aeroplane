@@ -73,6 +73,7 @@ let isSafari = false;
 let safariWarning;
 
 function preload() {
+  developerMode = !window.location.href.includes('aeroplane');
   jet = loadModel('assets/jet.obj');
   bg = loadImage('assets/bg.png');
   cloud = loadModel('assets/clouds.obj');
@@ -162,6 +163,8 @@ function setup() {
   for (let i = 0; i < snow.length; i++) {
     snow[i] = new Snowflake();
   }
+
+
 }
 
 function draw() {
@@ -390,6 +393,14 @@ function keyPressed() {
     helpMode = !helpMode;
     help.hide();
     recognition.hide();
+  } else if (key === 'r') {
+    isSnowing = false;
+    isRaining = !isRaining;
+  } else if (key === 's') {
+    isRaining = false;
+    isSnowing = !isSnowing;
+  } else if(key === 't') {
+    isTurbulence = !isTurbulence;
   }
 }
 
