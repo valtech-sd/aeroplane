@@ -6,6 +6,24 @@ canvas {
   display: block;
 }
 
+.help {
+  position: absolute;
+  color: white;
+  left: calc(50% - 70px);
+  /* top: calc(50% - 100px); */
+  bottom: 30px
+}
+
+.speechRecognition {
+  position: absolute;
+  color: white;
+  left: calc(50% - 120px);
+  top: calc(50% - 300px);
+  opacity: 0.5;
+  border-radius: 10px;
+  padding: 0 10px;
+}
+
 .debugger {
   color: white;
   position: absolute;
@@ -71,3 +89,4 @@ canvas {
   top: 80px;
   right: 100px;
 }
+

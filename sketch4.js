@@ -47,16 +47,27 @@ let speechParagraph = '';
 let speechRecognition, speechRecognitionText;
 
 // developer mode
-let developerMode = true;
+let developerMode = false;
 
 // rain
 let drops = new Array(250);
-let letItRain = false;
+let isRaining = false;
 
 // snow
 let snow = new Array(300);
-let letItSnow = false;
+let isSnowing = false;
 let snowGravity;
+
+// help mode
+let helpMode = false;
+let helpText;
+let help;
+let recognition;
+
+// turbulence
+let isTurbulence = false;
+
+let isGoogle = false;
 
 function preload() {
   jet = loadModel('assets/jet.obj');
@@ -72,7 +83,7 @@ function setup() {
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   glContext = canvas.GL;
 
-  isGoogleChrome();
+  isGoogle = isGoogleChrome();
 
   speechRec = new p5.SpeechRec('en-US', gotSpeech);
   continuous = false;
@@ -114,6 +125,13 @@ function setup() {
   speechRecognitionText = createP(speechRecognition);
   speechRecognitionText.class('speechRecognitionText');
 
+  help = select('.help');
+  recognition = select('.speechRecognition');
+  if (!isGoogle) {
+    recognition.html('speech recognition is not supported on this browser');
+  }
+  recognition.hide();
+
   // bg.hide();
   video.hide();
   flightDirectionText.hide();
@@ -121,6 +139,7 @@ function setup() {
   speechParagraph.hide();
   debuggerText.hide();
   speechRecognitionText.hide();
+  help.hide();
 
   gravity = createVector(0, 0, 0.1);
 
@@ -162,31 +181,25 @@ function draw() {
 
     flyAeroplane();
 
-    for (let cloud of clouds) {
-      cloud.applyForce(gravity);
-      cloud.update();
-      cloud.render();
+    if (isSnowing) {
+      for (let flake of snow) {
+        flake.applyForce(snowGravity);
+        flake.update();
+        flake.render();
+      }
     }
 
-    if (letItRain) {
-      if (letItSnow) {
-        letItSnow = false;
-      }
+    if (isRaining) {
       for (let drop of drops) {
         drop.fall();
         drop.render();
       }
     }
 
-    if (letItSnow) {
-      if (letItRain) {
-        letItRain = false;
-      }
-      for (let flake of snow) {
-        flake.applyForce(snowGravity);
-        flake.update();
-        flake.render();
-      }
+    for (let cloud of clouds) {
+      cloud.applyForce(gravity);
+      cloud.update();
+      cloud.render();
     }
 
     if (debuggerMode) {
@@ -213,6 +226,10 @@ function draw() {
       speechRecognitionText.hide();
     }
 
+    if (helpMode) {
+      recognition.show();
+    }
+
     if (frameRate() < 30) {
       framerateText.style('color', 'red');
       // console.log('framerate is low: ', frameRate().toFixed(0));
@@ -231,7 +248,7 @@ function gotSpeech() {
     let said = speechRec.resultString;
     speech = said;
 
-    if (said === 'toilet') {
+    if (said.includes('toilet')) {
       if (inflight.isPlaying()) {
         inflight.stop();
       }
@@ -243,12 +260,18 @@ function gotSpeech() {
       }, 7000);
     }
 
-    if (said.includes('rain')) {
-      letItRain = !letItRain;
+    if (said.includes('rain') || said.includes('raining')) {
+      isSnowing = false;
+      isRaining = !isRaining;
     }
 
-    if (said.includes('snow')) {
-      letItSnow = !letItSnow;
+    if (said.includes('snow') || said.includes('snowing')) {
+      isRaining = false;
+      isSnowing = !isSnowing;
+    }
+
+    if (said.includes('turbulence')) {
+      isTurbulence = !isTurbulence;
     }
   }
 }
@@ -275,7 +298,14 @@ function soundLoaded() {
         setTimeout(() => {
           frameworkReady = true;
           debuggerText.show();
+          help.show();
           inflight.loop();
+
+          // turn off toggles if they aren't pressed
+          setTimeout(() => {
+            debuggerText.hide();
+            help.hide();
+          }, 10000);
         }, 17000);
       }, 30000);
       // }, 27000);
@@ -284,6 +314,7 @@ function soundLoaded() {
     frameworkReady = true;
     setTimeout(() => {
       debuggerText.show();
+      help.show();
     }, 0);
   }
 }
@@ -334,7 +365,8 @@ function smoothing(speed) {
 
   averageSpeed.push(parseInt(speed));
   let sum = 0;
-  let lastOfArray = averageSpeed.slice(-20);
+  let turbulenceNumber = isTurbulence ? -3 : -20;
+  let lastOfArray = averageSpeed.slice(turbulenceNumber);
 
   for (let i = 0; i < lastOfArray.length; i++) {
     sum += lastOfArray[i];
@@ -347,6 +379,11 @@ function keyPressed() {
   if (key === 'd') {
     debuggerMode = !debuggerMode;
     debuggerText.hide();
+  } else if (key === 'h') {
+    recognition.style('background-color', 'gray');
+    helpMode = !helpMode;
+    help.hide();
+    recognition.hide();
   }
 }
 
@@ -362,8 +399,10 @@ function isGoogleChrome() {
     // is Google Chrome on IOS
   } else if (isChromium !== null && typeof isChromium !== 'undefined' && vendorName === 'Google Inc.' && isOpera === false && isIEedge === false) {
     // is Google Chrome
+    return true;
   } else {
     // not Google Chrome
     speechRecognition = 'This browser does not support Google Speech Recognition.  Please use Google Chrome Web Browser.';
+    return false;
   }
 }
