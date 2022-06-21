@@ -74,7 +74,6 @@ let safariWarning;
 
 // loading animation
 let isLoading = true;
-let angle = 0;
 let totalSeconds = 45;
 let counter = 0;
 
