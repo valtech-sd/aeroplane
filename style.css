@@ -96,3 +96,10 @@ canvas {
   top: 100px;
   left: calc(50% - 150px);
 }
+
+.warningText {
+  color: white;
+  position: absolute;
+  top: 100px;
+  left: calc(50% - 150px);
+}

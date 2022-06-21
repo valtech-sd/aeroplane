@@ -72,8 +72,16 @@ let isSafari = false;
 
 let safariWarning;
 
+// loading animation
+let isLoading = true;
+let angle = 0;
+let totalSeconds = 45;
+let counter = 0;
+
+let warningText;
+
 function preload() {
-  developerMode = !window.location.href.includes('aeroplane');
+  // developerMode = !window.location.href.includes('aeroplane');
   jet = loadModel('assets/jet.obj');
   bg = loadImage('assets/bg.png');
   cloud = loadModel('assets/clouds.obj');
@@ -84,6 +92,7 @@ function preload() {
 }
 
 function setup() {
+  loading();
   canvas = createCanvas(windowWidth, windowHeight, WEBGL);
   glContext = canvas.GL;
 
@@ -129,6 +138,9 @@ function setup() {
   speechRecognitionText = createP(speechRecognition);
   speechRecognitionText.class('speechRecognitionText');
 
+  warningText = createP('Please wait for the flight attendant before takeoff');
+  warningText.class('warningText');
+
   help = select('.help');
   recognition = select('.speechRecognition');
   if (!isGoogle) {
@@ -163,8 +175,6 @@ function setup() {
   for (let i = 0; i < snow.length; i++) {
     snow[i] = new Snowflake();
   }
-
-
 }
 
 function draw() {
@@ -177,8 +187,25 @@ function draw() {
   let cameraZ = height / 2.0 / tan(fov / 2.0);
   perspective(fov, width / height, cameraZ / 10.0, cameraZ * 20000.0);
 
+  if (isLoading) {
+    push();
+    stroke(255);
+    noFill();
+    rect(-100, -500, 200, 20);
+    pop();
+
+    push();
+    noStroke();
+    fill(255, 100);
+    var w = (200 * counter) / totalSeconds;
+    rect(-100, -500, w, 20);
+    pop();
+  }
+
   if (frameworkReady) {
     ambientLight(100); // light that shines everywhere
+
+    console.log(-smoothing(speed));
 
     push();
     scale(70);
@@ -248,6 +275,16 @@ function draw() {
   }
 }
 
+function loading() {
+  let interval = setInterval(function () {
+    if (++counter === totalSeconds + 1) {
+      isLoading = false;
+      warningText.hide();
+      clearInterval(interval);
+    }
+  }, 1000);
+}
+
 function restart() {
   speechRec.start(continuous, interimResults);
 }
@@ -298,27 +335,22 @@ function modelLoaded() {
 function soundLoaded() {
   console.log('sound loaded');
   if (!developerMode) {
+    announcements.play(0, 1, 1, 125, 30);
     setTimeout(() => {
-      // announcements.play(0, 1, 1, 17, 27);
-      // setTimeout(() => {
-      announcements.play(0, 1, 1, 125, 30);
+      takeoff.play(0, 1, 1, 0, 17);
       setTimeout(() => {
-        takeoff.play(0, 1, 1, 0, 17);
-        setTimeout(() => {
-          frameworkReady = true;
-          debuggerText.show();
-          help.show();
-          inflight.loop();
+        frameworkReady = true;
+        debuggerText.show();
+        help.show();
+        inflight.loop();
 
-          // turn off toggles if they aren't pressed
-          setTimeout(() => {
-            debuggerText.hide();
-            help.hide();
-          }, 10000);
-        }, 17000);
-      }, 30000);
-      // }, 27000);
-    }, 2000);
+        // turn off toggles if they aren't pressed
+        setTimeout(() => {
+          debuggerText.hide();
+          help.hide();
+        }, 10000);
+      }, 17000);
+    }, 30000);
   } else {
     frameworkReady = true;
     setTimeout(() => {
@@ -399,7 +431,7 @@ function keyPressed() {
   } else if (key === 's') {
     isRaining = false;
     isSnowing = !isSnowing;
-  } else if(key === 't') {
+  } else if (key === 't') {
     isTurbulence = !isTurbulence;
   }
 }
