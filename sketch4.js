@@ -27,7 +27,7 @@ let framerate, framerateText;
 let averageSpeed = [];
 
 // developer mode
-let debuggerMode = false;
+let developerMode = false;
 let debuggerText;
 
 let gravity;
@@ -45,9 +45,6 @@ let speech = '',
 let speechParagraph = '';
 
 let speechRecognition, speechRecognitionText;
-
-// developer mode
-let developerMode = false;
 
 // rain
 let drops = new Array(250);
@@ -137,8 +134,10 @@ function setup() {
   speechRecognitionText = createP(speechRecognition);
   speechRecognitionText.class('speechRecognitionText');
 
-  warningText = createP('Please wait for the flight attendant before takeoff');
-  warningText.class('warningText');
+  if (!developerMode) {
+    warningText = createP('Please wait for the flight attendant before takeoff');
+    warningText.class('warningText');
+  }
 
   help = select('.help');
   recognition = select('.speechRecognition');
@@ -186,7 +185,7 @@ function draw() {
   let cameraZ = height / 2.0 / tan(fov / 2.0);
   perspective(fov, width / height, cameraZ / 10.0, cameraZ * 20000.0);
 
-  if (isLoading) {
+  if (isLoading && !developerMode) {
     push();
     stroke(255);
     noFill();
@@ -237,7 +236,7 @@ function draw() {
       cloud.render();
     }
 
-    if (debuggerMode) {
+    if (developerMode) {
       flightDirectionText.show();
       speedDirectionText.show();
       flyingModeText.show();
@@ -333,7 +332,14 @@ function modelLoaded() {
 
 function soundLoaded() {
   console.log('sound loaded');
-  if (!developerMode) {
+
+  if (developerMode) {
+    frameworkReady = true;
+    setTimeout(() => {
+      debuggerText.show();
+      help.show();
+    }, 0);
+  } else {
     announcements.play(0, 1, 1, 125, 30);
     setTimeout(() => {
       takeoff.play(0, 1, 1, 0, 17);
@@ -350,12 +356,6 @@ function soundLoaded() {
         }, 10000);
       }, 17000);
     }, 30000);
-  } else {
-    frameworkReady = true;
-    setTimeout(() => {
-      debuggerText.show();
-      help.show();
-    }, 0);
   }
 }
 
@@ -417,7 +417,7 @@ function smoothing(speed) {
 
 function keyPressed() {
   if (key === 'd') {
-    debuggerMode = !debuggerMode;
+    developerMode = !developerMode;
     debuggerText.hide();
   } else if (key === 'h') {
     recognition.style('background-color', 'gray');
