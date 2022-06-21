@@ -80,7 +80,7 @@ let counter = 0;
 let warningText;
 
 function preload() {
-  // developerMode = !window.location.href.includes('aeroplane');
+  developerMode = !window.location.href.includes('aeroplane');
   jet = loadModel('assets/jet.obj');
   bg = loadImage('assets/bg.png');
   cloud = loadModel('assets/clouds.obj');
@@ -190,14 +190,14 @@ function draw() {
     push();
     stroke(255);
     noFill();
-    rect(-100, -500, 200, 20);
+    rect(-100, -325, 200, 20);
     pop();
 
     push();
     noStroke();
     fill(255, 100);
     var w = (200 * counter) / totalSeconds;
-    rect(-100, -500, w, 20);
+    rect(-100, -325, w, 20);
     pop();
   }
 
